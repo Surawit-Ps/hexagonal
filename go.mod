@@ -1,4 +1,4 @@
-module hexgo
+module hexagonal
 
 go 1.25.2
 

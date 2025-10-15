@@ -21,6 +21,10 @@ func (s *Service) Create(m *Me) error {
 	return s.repo.Create(m) 
 }
 
-func (s *Service) Update(id int,m *Me) error{
+func (s *Service) Update(id int, m *Me) error{
+	return s.repo.Update(id, m)
+}
+
+func (s *Service) Delete(id int) error{
 	return s.repo.Delete(id)
 }
