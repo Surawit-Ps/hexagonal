@@ -56,15 +56,14 @@ func (r *MongoRepo) Create(m *core.Me) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// ✅ ใส่ ID ให้ Me
+
 	m.ID = primitive.NewObjectID()
 
-	// ✅ ใส่ ID ให้ Education
+
 	for i := range m.EducaRecord {
 		m.EducaRecord[i].ID = primitive.NewObjectID()
 	}
 
-	// ✅ ใส่ ID ให้ WorkExperience และ Project
 	for i := range m.WorkExp {
 		m.WorkExp[i].ID = primitive.NewObjectID()
 		for j := range m.WorkExp[i].Project {
@@ -110,4 +109,73 @@ func (r *MongoRepo) Delete(id string) error {
 	_, err = r.col.DeleteOne(ctx, bson.M{"_id": objID})
 	return err
 }
+
+func (r *MongoRepo) DeleteEducation(userId string, eduId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjectID, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return err
+	}
+
+	eduObjectID, err := primitive.ObjectIDFromHex(eduId)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{"_id": userObjectID}
+	update := bson.M{
+		"$pull": bson.M{
+			"educa_record": bson.M{"_id": eduObjectID},
+		},
+	}
+
+	_, err = r.col.UpdateOne(ctx, filter, update)
+	return err
+}
+
+
+// ---------- Education ----------
+// func (r *MongoRepo) AddEducation(userID string, edu core.Education) error {
+//     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+//     defer cancel()
+
+//     userObjID, err := primitive.ObjectIDFromHex(userID)
+//     if err != nil {
+//         return err
+//     }
+
+//     edu.ID = primitive.NewObjectID()
+//     update := bson.M{"$push": bson.M{"educa_record": edu}}
+
+//     _, err = r.col.UpdateByID(ctx, userObjID, update)
+//     return err
+// }
+
+// func (r *MongoRepo) UpdateEducation(userID string, eduID string, edu core.Education) error {
+//     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+//     defer cancel()
+
+//     userObjID, err := primitive.ObjectIDFromHex(userID)
+//     if err != nil {
+//         return err
+//     }
+//     eduObjID, err := primitive.ObjectIDFromHex(eduID)
+//     if err != nil {
+//         return err
+//     }
+
+//     filter := bson.M{"_id": userObjID, "educa_record._id": eduObjID}
+//     update := bson.M{
+//         "$set": bson.M{
+//             "educa_record.$.school": edu.School,
+//             "educa_record.$.gpa":    edu.GPA,
+//             "educa_record.$.year":   edu.Year,
+//         },
+//     }
+
+//     _, err = r.col.UpdateOne(ctx, filter, update)
+//     return err
+// }
 

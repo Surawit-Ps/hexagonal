@@ -4,6 +4,7 @@ import (
 	"context"
 	"hexagonal/core"
 	"hexagonal/repository"
+	"hexagonal/adapter"
 	"log"
 	"os"
 	"time"
@@ -47,8 +48,6 @@ func ConnectMongo() *mongo.Database {
 	}
 
 	log.Println("✅ Connected to MongoDB Atlas successfully!")
-
-	// ใช้ database “hexagonal_db”
 	return client.Database("jab")
 }
 
@@ -119,6 +118,11 @@ func main() {
 			"database": db.Name(),
 			"status":   "connected",
 		})
+	})
+
+	app.Delete("/me/:id/education/:eduId", func(c *fiber.Ctx) error {
+		handler := adapter.NewHandler(service)
+		return handler.DeleteEducation(c)
 	})
 
 	log.Fatal(app.Listen(":3000"))
