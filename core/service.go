@@ -32,10 +32,36 @@ func (s *Service) DeleteEducation(userId string, eduId string) error {
 	return s.repo.DeleteEducation(userId, eduId)
 }
 
-// func (s *Service) AddEducation(userID string, edu Education) error {
-// 	return s.repo.AddEducation(userID, edu)
-// }
-// func (s *Service) UpdateEducation(userID string, eduID string, edu Education) error {
-// 	return s.repo.UpdateEducation(userID, eduID, edu)
-// }
+func (s *Service) AddEducation(userId string, edu *Education) error {
+	return s.repo.AddEducation(userId, edu)
+}
+
+func (s *Service) UpdateEducation(userId string, eduId string, edu *Education) error {
+	return s.repo.UpdateEducation(userId, eduId, edu)
+}
+
+
+func (s *Service) AddWorkExp(userId string, work *WorkExperience) error {
+	return s.repo.AddWorkExp(userId, work)
+}
+
+func (s *Service) UpdateWorkExp(userId string, workId string, work *WorkExperience) error {
+	return s.repo.UpdateWorkExp(userId, workId, work)
+}
+
+func (s *Service) DeleteWorkExp(userId string, workId string) error {
+	return s.repo.DeleteWorkExp(userId, workId)
+}
+
+func (s *Service) AddProject(userId string, workId string, proj *Project) error {
+	return s.repo.AddProject(userId, workId, proj)
+}
+
+func (s *Service) UpdateProject(userId string, workId string, projId string, proj *Project) error {
+	return s.repo.UpdateProject(userId, workId, projId, proj)
+}
+
+func (s *Service) DeleteProject(userId string, workId string, projId string) error {
+	return s.repo.DeleteProject(userId, workId, projId)
+}
 

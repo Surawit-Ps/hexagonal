@@ -124,6 +124,21 @@ func main() {
 		handler := adapter.NewHandler(service)
 		return handler.DeleteEducation(c)
 	})
+	
+	handler := adapter.NewHandler(service)
+	app.Post("/me/:id/education", handler.AddEducation)
+	app.Put("/me/:id/education/:eduId", handler.UpdateEducation)
+	app.Delete("/me/:id/education/:eduId", handler.DeleteEducation)
+
+	// Work Experience CRUD
+	app.Post("/me/:id/workexp", handler.AddWorkExp)
+	app.Put("/me/:id/workexp/:workId", handler.UpdateWorkExp)
+	app.Delete("/me/:id/workexp/:workId", handler.DeleteWorkExp)
+
+	// Project CRUD
+	app.Post("/me/:id/workexp/:workId/project", handler.AddProject)
+	app.Put("/me/:id/workexp/:workId/project/:projId", handler.UpdateProject)
+	app.Delete("/me/:id/workexp/:workId/project/:projId", handler.DeleteProject)
 
 	log.Fatal(app.Listen(":3000"))
 }

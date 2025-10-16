@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MongoRepo struct {
@@ -135,47 +136,149 @@ func (r *MongoRepo) DeleteEducation(userId string, eduId string) error {
 	return err
 }
 
+func (r *MongoRepo) AddEducation(userId string, edu *core.Education) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-// ---------- Education ----------
-// func (r *MongoRepo) AddEducation(userID string, edu core.Education) error {
-//     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-//     defer cancel()
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	edu.ID = primitive.NewObjectID()
 
-//     userObjID, err := primitive.ObjectIDFromHex(userID)
-//     if err != nil {
-//         return err
-//     }
+	update := bson.M{
+		"$push": bson.M{"educa_record": edu},
+	}
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": userObjID}, update)
+	return err
+}
 
-//     edu.ID = primitive.NewObjectID()
-//     update := bson.M{"$push": bson.M{"educa_record": edu}}
+func (r *MongoRepo) UpdateEducation(userId string, eduId string, edu *core.Education) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-//     _, err = r.col.UpdateByID(ctx, userObjID, update)
-//     return err
-// }
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	eduObjID, _ := primitive.ObjectIDFromHex(eduId)
 
-// func (r *MongoRepo) UpdateEducation(userID string, eduID string, edu core.Education) error {
-//     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-//     defer cancel()
+	update := bson.M{
+		"$set": bson.M{
+			"educa_record.$.school": edu.School,
+			"educa_record.$.gpa":    edu.GPA,
+			"educa_record.$.year":   edu.Year,
+		},
+	}
 
-//     userObjID, err := primitive.ObjectIDFromHex(userID)
-//     if err != nil {
-//         return err
-//     }
-//     eduObjID, err := primitive.ObjectIDFromHex(eduID)
-//     if err != nil {
-//         return err
-//     }
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": userObjID, "educa_record._id": eduObjID}, update)
+	return err
+}
 
-//     filter := bson.M{"_id": userObjID, "educa_record._id": eduObjID}
-//     update := bson.M{
-//         "$set": bson.M{
-//             "educa_record.$.school": edu.School,
-//             "educa_record.$.gpa":    edu.GPA,
-//             "educa_record.$.year":   edu.Year,
-//         },
-//     }
+// ---------------- Work Experience ----------------
+func (r *MongoRepo) AddWorkExp(userId string, work *core.WorkExperience) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-//     _, err = r.col.UpdateOne(ctx, filter, update)
-//     return err
-// }
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	work.ID = primitive.NewObjectID()
+
+	update := bson.M{
+		"$push": bson.M{"work_exp": work},
+	}
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": userObjID}, update)
+	return err
+}
+
+func (r *MongoRepo) UpdateWorkExp(userId string, workId string, work *core.WorkExperience) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	workObjID, _ := primitive.ObjectIDFromHex(workId)
+
+	update := bson.M{
+		"$set": bson.M{
+			"work_exp.$.company": work.Company,
+			"work_exp.$.years":   work.Years,
+			"work_exp.$.project": work.Project,
+		},
+	}
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": userObjID, "work_exp._id": workObjID}, update)
+	return err
+}
+
+func (r *MongoRepo) DeleteWorkExp(userId string, workId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	workObjID, _ := primitive.ObjectIDFromHex(workId)
+
+	update := bson.M{
+		"$pull": bson.M{"work_exp": bson.M{"_id": workObjID}},
+	}
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": userObjID}, update)
+	return err
+}
+
+// ---------------- Project ----------------
+func (r *MongoRepo) AddProject(userId string, workId string, proj *core.Project) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	workObjID, _ := primitive.ObjectIDFromHex(workId)
+	proj.ID = primitive.NewObjectID()
+
+	update := bson.M{
+		"$push": bson.M{"work_exp.$.project": proj},
+	}
+
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": userObjID, "work_exp._id": workObjID}, update)
+	return err
+}
+
+func (r *MongoRepo) UpdateProject(userId string, workId string, projId string, proj *core.Project) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	workObjID, _ := primitive.ObjectIDFromHex(workId)
+	projObjID, _ := primitive.ObjectIDFromHex(projId)
+
+	// ใช้ positional filter ซ้อนสำหรับ array project
+	filter := bson.M{
+		"_id":                    userObjID,
+		"work_exp._id":           workObjID,
+		"work_exp.project._id":   projObjID,
+	}
+	update := bson.M{
+		"$set": bson.M{
+			"work_exp.$[w].project.$[p].project_name": proj.ProjectName,
+			"work_exp.$[w].project.$[p].description":  proj.Description,
+			"work_exp.$[w].project.$[p].link":        proj.Link,
+		},
+	}
+	opts := options.Update().SetArrayFilters(options.ArrayFilters{
+		Filters: []interface{}{
+			bson.M{"w._id": workObjID},
+			bson.M{"p._id": projObjID},
+		},
+	})
+	_, err := r.col.UpdateOne(ctx, filter, update, opts)
+	return err
+}
+
+func (r *MongoRepo) DeleteProject(userId string, workId string, projId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	workObjID, _ := primitive.ObjectIDFromHex(workId)
+	projObjID, _ := primitive.ObjectIDFromHex(projId)
+
+	filter := bson.M{"_id": userObjID, "work_exp._id": workObjID}
+	update := bson.M{
+		"$pull": bson.M{"work_exp.$.project": bson.M{"_id": projObjID}},
+	}
+	_, err := r.col.UpdateOne(ctx, filter, update)
+	return err
+}
+
+
 
