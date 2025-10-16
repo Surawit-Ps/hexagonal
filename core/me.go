@@ -3,7 +3,7 @@ package core
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Me struct {
-	ID          primitive.ObjectID `jason:"id" bson:"_id,omitempty"`
+	ID          primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	Name        string             `json:"name" bson:"name"`
 	NickName    string             `json:"nick_name" bson:"nick_name"`
 	Age         int                `json:"age" bson:"age"`

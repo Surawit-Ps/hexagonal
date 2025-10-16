@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type MongoRepo struct {
@@ -15,7 +15,7 @@ type MongoRepo struct {
 }
 
 func NewMongoRepo(db *mongo.Database) core.CVrepository {
-	return &MongoRepo{col: db.Collection("Me")}
+	return &MongoRepo{col: db.Collection("prismo")}
 }
 
 func (r *MongoRepo) GetAll() ([]core.Me, error) {
@@ -46,17 +46,17 @@ func (r *MongoRepo) GetById(id string) (*core.Me, error) {
 
 	var me core.Me
 	err = r.col.FindOne(ctx, bson.M{"_id": objID}).Decode(&me)
-	if err != nil {
-		return nil, err
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
 	}
-	return &me, nil
+	return &me, err
 }
 
 func (r *MongoRepo) Create(m *core.Me) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	m.ID = primitive.NewObjectID() // ✅ สร้าง _id ใหม่อัตโนมัติ
+	m.ID = primitive.NewObjectID()
 	_, err := r.col.InsertOne(ctx, m)
 	return err
 }
@@ -70,7 +70,15 @@ func (r *MongoRepo) Update(id string, m *core.Me) error {
 		return err
 	}
 
-	_, err = r.col.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": m})
+	update := bson.M{
+		"name":         m.Name,
+		"nick_name":    m.NickName,
+		"age":          m.Age,
+		"educa_record": m.EducaRecord,
+		"work_exp":     m.WorkExp,
+	}
+
+	_, err = r.col.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": update})
 	return err
 }
 
