@@ -56,10 +56,26 @@ func (r *MongoRepo) Create(m *core.Me) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// ✅ ใส่ ID ให้ Me
 	m.ID = primitive.NewObjectID()
+
+	// ✅ ใส่ ID ให้ Education
+	for i := range m.EducaRecord {
+		m.EducaRecord[i].ID = primitive.NewObjectID()
+	}
+
+	// ✅ ใส่ ID ให้ WorkExperience และ Project
+	for i := range m.WorkExp {
+		m.WorkExp[i].ID = primitive.NewObjectID()
+		for j := range m.WorkExp[i].Project {
+			m.WorkExp[i].Project[j].ID = primitive.NewObjectID()
+		}
+	}
+
 	_, err := r.col.InsertOne(ctx, m)
 	return err
 }
+
 
 func (r *MongoRepo) Update(id string, m *core.Me) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -94,3 +110,4 @@ func (r *MongoRepo) Delete(id string) error {
 	_, err = r.col.DeleteOne(ctx, bson.M{"_id": objID})
 	return err
 }
+
