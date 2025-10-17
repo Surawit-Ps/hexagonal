@@ -280,5 +280,66 @@ func (r *MongoRepo) DeleteProject(userId string, workId string, projId string) e
 	return err
 }
 
+// PatchEducation แก้เฉพาะบาง field ใน education
+func (r *MongoRepo) PatchEducation(userId string, eduId string, update map[string]interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	eduObjID, _ := primitive.ObjectIDFromHex(eduId)
+
+	setFields := bson.M{}
+	for key, value := range update {
+		setFields["educa_record.$."+key] = value
+	}
+
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": userObjID, "educa_record._id": eduObjID}, bson.M{"$set": setFields})
+	return err
+}
+
+// PatchWorkExp แก้เฉพาะบาง field ใน work_exp
+func (r *MongoRepo) PatchWorkExp(userId string, workId string, update map[string]interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	workObjID, _ := primitive.ObjectIDFromHex(workId)
+
+	setFields := bson.M{}
+	for key, value := range update {
+		setFields["work_exp.$."+key] = value
+	}
+
+	_, err := r.col.UpdateOne(ctx, bson.M{"_id": userObjID, "work_exp._id": workObjID}, bson.M{"$set": setFields})
+	return err
+}
+
+// PatchProject แก้เฉพาะบาง field ใน project ที่อยู่ใน work_exp
+func (r *MongoRepo) PatchProject(userId string, workId string, projectId string, update map[string]interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	userObjID, _ := primitive.ObjectIDFromHex(userId)
+	workObjID, _ := primitive.ObjectIDFromHex(workId)
+	projectObjID, _ := primitive.ObjectIDFromHex(projectId)
+
+	setFields := bson.M{}
+	for key, value := range update {
+		setFields["work_exp.$[w].project.$[p]."+key] = value
+	}
+
+	_, err := r.col.UpdateOne(
+		ctx,
+		bson.M{"_id": userObjID},
+		bson.M{"$set": setFields},
+		options.Update().SetArrayFilters(options.ArrayFilters{
+			Filters: []interface{}{
+				bson.M{"w._id": workObjID},
+				bson.M{"p._id": projectObjID},
+			},
+		}),
+	)
+	return err
+}
 
 

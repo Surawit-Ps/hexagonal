@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"hexagonal/core"
-	"hexagonal/repository"
+	"hexagonal/adapter/repository"
 	"hexagonal/adapter"
 	"log"
 	"os"
@@ -130,6 +130,7 @@ func main() {
 	app.Put("/me/:id/education/:eduId", handler.UpdateEducation)
 	app.Delete("/me/:id/education/:eduId", handler.DeleteEducation)
 
+
 	// Work Experience CRUD
 	app.Post("/me/:id/workexp", handler.AddWorkExp)
 	app.Put("/me/:id/workexp/:workId", handler.UpdateWorkExp)
@@ -139,6 +140,11 @@ func main() {
 	app.Post("/me/:id/workexp/:workId/project", handler.AddProject)
 	app.Put("/me/:id/workexp/:workId/project/:projId", handler.UpdateProject)
 	app.Delete("/me/:id/workexp/:workId/project/:projId", handler.DeleteProject)
+
+	app.Patch("/me/:id/education/:eduId", handler.PatchEducation)
+	app.Patch("/me/:id/workexp/:workId", handler.PatchWorkExp)
+	app.Patch("/me/:id/workexp/:workId/project/:projectId", handler.PatchProject)
+
 
 	log.Fatal(app.Listen(":3000"))
 }

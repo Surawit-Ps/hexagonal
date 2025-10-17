@@ -17,4 +17,8 @@ type CVrepository interface {
 	AddProject(userId string, workId string, proj *Project) error
 	UpdateProject(userId string, workId string, projId string, proj *Project) error
 	DeleteProject(userId string, workId string, projId string) error
+
+	PatchEducation(userId string, eduId string, eduData map[string]interface{}) error
+	PatchWorkExp(userId string, workId string, workData map[string]interface{}) error
+	PatchProject(userId string, workId string, projId string, projData map[string]interface{}) error
 }

@@ -4,6 +4,10 @@ type Service struct {
 	repo CVrepository
 }
 
+func (s *Service) UpdateWorkExpPatch(userId string, workId string, experience *WorkExperience) any {
+	panic("unimplemented")
+}
+
 func NewService(r CVrepository) *Service {
 	return &Service{repo: r}
 }
@@ -40,7 +44,6 @@ func (s *Service) UpdateEducation(userId string, eduId string, edu *Education) e
 	return s.repo.UpdateEducation(userId, eduId, edu)
 }
 
-
 func (s *Service) AddWorkExp(userId string, work *WorkExperience) error {
 	return s.repo.AddWorkExp(userId, work)
 }
@@ -63,5 +66,17 @@ func (s *Service) UpdateProject(userId string, workId string, projId string, pro
 
 func (s *Service) DeleteProject(userId string, workId string, projId string) error {
 	return s.repo.DeleteProject(userId, workId, projId)
+}
+
+func (s *Service) PatchEducation(userId string, eduId string, update map[string]interface{}) error {
+	return s.repo.PatchEducation(userId, eduId, update)
+}
+
+func (s *Service) PatchWorkExp(userId string, workId string, update map[string]interface{}) error {
+	return s.repo.PatchWorkExp(userId, workId, update)
+}
+
+func (s *Service) PatchProject(userId string, workId string, projectId string, update map[string]interface{}) error {
+	return s.repo.PatchProject(userId, workId, projectId, update)
 }
 

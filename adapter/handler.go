@@ -121,3 +121,52 @@ func (h *Handler) DeleteProject(c *fiber.Ctx) error {
 	}
 	return c.JSON(fiber.Map{"message": "project deleted"})
 }
+
+// PATCH Education
+func (h *Handler) PatchEducation(c *fiber.Ctx) error {
+	userId := c.Params("id")
+	eduId := c.Params("eduId")
+
+	var partialUpdate map[string]interface{}
+	if err := c.BodyParser(&partialUpdate); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if err := h.svc.PatchEducation(userId, eduId, partialUpdate); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(fiber.Map{"message": "education patched"})
+}
+
+// PATCH Work Experience
+func (h *Handler) PatchWorkExp(c *fiber.Ctx) error {
+	userId := c.Params("id")
+	workId := c.Params("workId")
+
+	var partialUpdate map[string]interface{}
+	if err := c.BodyParser(&partialUpdate); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if err := h.svc.PatchWorkExp(userId, workId, partialUpdate); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(fiber.Map{"message": "work experience patched"})
+}
+
+// PATCH Project
+func (h *Handler) PatchProject(c *fiber.Ctx) error {
+	userId := c.Params("id")
+	workId := c.Params("workId")
+	projectId := c.Params("projectId")
+
+	var partialUpdate map[string]interface{}
+	if err := c.BodyParser(&partialUpdate); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if err := h.svc.PatchProject(userId, workId, projectId, partialUpdate); err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(fiber.Map{"message": "project patched"})
+}
